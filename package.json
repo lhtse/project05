@@ -1,0 +1,19 @@
+{
+  "name": "unscramble-it",
+  "version": "1.0.0",
+  "description": "word unscrambler game",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lhtse/project05.git"
+  },
+  "author": "Arpita K, Neil T, Isaac K, Lydia T",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lhtse/project05/issues"
+  },
+  "homepage": "https://github.com/lhtse/project05#readme"
+}
