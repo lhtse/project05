@@ -4,6 +4,7 @@
   "description": "server for unscramble it game",
   "main": "server.js",
   "dependencies": {
+    "express": "^4.16.4",
     "socket.io": "^2.2.0"
   },
   "devDependencies": {},
