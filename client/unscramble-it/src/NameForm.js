@@ -1,4 +1,5 @@
-import React, { Component } from "react";
+import React, { PropTypes, Component } from "react";
+import { withRouter } from "react-router-dom";
 
 /**
  * NameForm component: renders text box that allows
@@ -24,6 +25,8 @@ class NameForm extends Component {
   handleSubmit(event) {
     alert("user name typed in was: " + this.state.value);
     event.preventDefault();
+
+    this.props.history.push("/GamePage");
   }
 
   // Render the component
@@ -42,4 +45,4 @@ class NameForm extends Component {
   }
 }
 
-export { NameForm }; // Exporting component
+export default withRouter(NameForm); // Exporting component
