@@ -49,7 +49,7 @@ io.on("connection", client => {
   client.on("player joined", playerInfo => {
     console.log("player has joined: " + playerInfo.name);
 
-    io.emit("to waiting room");
+    io.emit("show waiting room");
 
     playerMap.set(playerInfo.name, playerInfo);
     io.emit("in waiting room", playerMap.get(playerInfo.name));

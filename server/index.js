@@ -75,3 +75,10 @@ function showModal(modal) {
     false
   );
 }
+
+/*****************************
+ * Handling server messages
+ *****************************/
+socket.on("show waiting room", () => {
+  showModal(document.getElementById("waiting-room"));
+});
