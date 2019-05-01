@@ -49,10 +49,21 @@ io.on("connection", client => {
   client.on("player joined", playerInfo => {
     console.log("player has joined: " + playerInfo.name);
 
-    io.emit("show waiting room");
-
+    // Add the new player object to the player map
     playerMap.set(playerInfo.name, playerInfo);
-    io.emit("in waiting room", playerMap.get(playerInfo.name));
+
+    // Add the new player to the queue
+    queue.push(playerInfo.name);
+
+    // Check to see if there are 4 players in the queue
+    if (queue.length == 4) {
+      io.emit("starting game");
+      // Remove first 4 players
+      // Start the game
+    } else {
+      // Alerting that the user should be in waiting room
+      io.send("show waiting room");
+    }
   });
 });
 

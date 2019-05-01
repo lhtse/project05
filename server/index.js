@@ -32,20 +32,23 @@ function init() {
   var nameField = document.getElementById("name-field");
   var nameModal = document.getElementById("name-modal");
 
-  showModal(nameModal);
+  showModal(nameModal); // Display the display name modal
 
+  // Add even handler for display name submission
   addEvent(
     nameForm,
     "submit",
     event => {
-      playerInfo.name = nameField.value;
-      alert("display name: " + playerInfo.name);
-      socket.emit("player joined", playerInfo);
+      playerInfo.name = nameField.value; // Update the info object with display name
+      socket.emit("player joined", playerInfo); // Send info to the server
 
       // Unblock the modal
       nameModal.style.display = "none";
 
-      event.preventDefault(); // preventing from reloading the page fixme: might need to remove
+      // Display waiting room by default
+      showModal(document.getElementById("waiting-room"));
+
+      event.preventDefault(); // preventing from reloading the page
     },
     false
   );
@@ -79,6 +82,6 @@ function showModal(modal) {
 /*****************************
  * Handling server messages
  *****************************/
-socket.on("show waiting room", () => {
-  showModal(document.getElementById("waiting-room"));
+socket.on("starting game", () => {
+  document.getElementById("waiting-room").style.display = "none";
 });
