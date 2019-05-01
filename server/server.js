@@ -51,3 +51,11 @@ io.on("connection", client => {
  * Begin game helper functions and variables
  *********************************************/
 var queue = []; // Creating queue using an array
+
+
+//Information of each individual player is stored.
+//We need to keep track of their name for the results page and their score to determine who wins the game
+var playerInfo = {
+  name: "",
+  score:0
+};
