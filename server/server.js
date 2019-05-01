@@ -12,10 +12,11 @@ const io = require("socket.io")(httpServer);
 
 const port = process.env.PORT || 3000;
 
-app.use("/static", express.static(path.join(__dirname)));
-/**
+app.use("/static", express.static(path.join(__dirname))); // fixme: might not need this so delete
+
+/**************************************
  * Server is listening on the port
- */
+ **************************************/
 httpServer.listen(port, () => {
   console.log("listening on port ", port);
 });
@@ -26,12 +27,19 @@ app.get("/index.js", function(req, res) {
 
 app.get("/", function(req, res) {
   res.sendFile(__dirname + "/index.html");
-  // res.sendFile(__dirname + "/index.js");
 });
 
-/**
+app.get("/waitingRoom.html", (req, res) => {
+  res.sendFile(__dirname + "/waitingRoom.html");
+});
+
+app.get("/waitingRoom.js", (req, res) => {
+  res.sendFile(__dirname + "/waitingRoom.js");
+});
+
+/************************************
  * Handler for when client connects
- */
+ ***********************************/
 io.on("connection", client => {
   console.log("a client has connected");
 
@@ -41,13 +49,19 @@ io.on("connection", client => {
   });
 
   // Handling when player has joined
-  client.on("player joined", displayName => {
-    console.log("player has joined: " + displayName);
-    io.emit("say hello", displayName + " says helloooo");
+  // Listens for "player joined" string then will display the message
+  client.on("player joined", playerInfo => {
+    console.log("player has joined: " + playerInfo.name);
+
+    io.emit("to waiting room", "/waitingRoom.html");
+
+    playerMap.set(playerInfo.name, playerInfo);
+    io.emit("in waiting room", playerMap.get(playerInfo.name));
   });
 });
 
 /********************************************
  * Begin game helper functions and variables
  *********************************************/
-var queue = []; // Creating queue using an array
+var queue = []; // Creating queue using an array that will hold the names of the players
+var playerMap = new Map();

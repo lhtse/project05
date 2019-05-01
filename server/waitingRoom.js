@@ -1,7 +1,9 @@
+/**
+ * TODO:
+ * Have a json object that is sent to the client on connection
+ */
 var socket = io(); // Holds the client socket
-var playerInfo = {
-  name: ""
-};
+var playerInfo;
 
 //Running init() function after page loads
 addEvent(window, "load", init, false);
@@ -26,28 +28,9 @@ function addEvent(object, eventName, functName, cap) {
 /******************************************
  * Defintion of init:
  *****************************************/
-function init() {
-  // Setting up action handler for the display name form
-  var nameForm = document.getElementById("name-form");
-  var nameField = document.getElementById("name-field");
+function init() {}
 
-  addEvent(
-    nameForm,
-    "submit",
-    event => {
-      // displayName = nameField.value;
-      playerInfo.name = nameField.value;
-      alert("display name: " + playerInfo.name);
-      socket.emit("player joined", playerInfo);
-      event.preventDefault(); // preventing from reloading the page fixme: might need to remove
-    },
-    false
-  );
-}
-
-/**************************************
- * Receiving message from server
- **************************************/
-socket.on("to waiting room", path => {
-  window.location.href = path;
+socket.on("in waiting room", playerObj => {
+  playerInfo = playerObj;
+  console.log("the name of this player is: " + playerInfo.name);
 });
