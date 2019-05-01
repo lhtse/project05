@@ -30,24 +30,48 @@ function init() {
   // Setting up action handler for the display name form
   var nameForm = document.getElementById("name-form");
   var nameField = document.getElementById("name-field");
+  var nameModal = document.getElementById("name-modal");
+
+  showModal(nameModal);
 
   addEvent(
     nameForm,
     "submit",
     event => {
-      // displayName = nameField.value;
       playerInfo.name = nameField.value;
       alert("display name: " + playerInfo.name);
       socket.emit("player joined", playerInfo);
+
+      // Unblock the modal
+      nameModal.style.display = "none";
+
       event.preventDefault(); // preventing from reloading the page fixme: might need to remove
     },
     false
   );
 }
 
-/**************************************
- * Receiving message from server
- **************************************/
-socket.on("to waiting room", path => {
-  window.location.href = path;
-});
+/*******************************
+ * Display Modals
+ *******************************/
+function showModal(modal) {
+  // Getting the modal
+  modal.style.display = "block";
+
+  // Shake modal when user clicks outside
+  addEvent(
+    window,
+    "click",
+    event => {
+      // Setting up the modal to update based on window size
+      modal.classList.remove("shake");
+      modal.offsetHeight;
+
+      // Implementing shaking effect
+      if (event.target == modal) {
+        modal.classList.add("shake");
+      }
+    },
+    false
+  );
+}

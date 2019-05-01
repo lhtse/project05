@@ -6,22 +6,45 @@
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet"
     />
+    <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet"/>
     <script src="/socket.io/socket.io.js"></script>
     <script src="index.js"></script>
   </head>
   <body>
-    <header>
-      <h1>Unscramble it!</h1>
-    </header>
-    <main>
+    <!-- Display Name Modal -->
+    <aside class="modal" id="name-modal">
       <form id="name-form">
-        <input id="name-field" type="text" placeholder="Your Display Name" />
+        <h2>Welcome to Unscramble it!</h2>
+        <input class='textfield' id="name-field" type="text" placeholder="Your Display Name" />
         <button class="submit-btn" type="submit">
           <i class="material-icons">
             arrow_forward
           </i>
         </button>
       </form>
+    </aside>
+    <!-- Waiting Room Modal -->
+    <aside class="modal" id="waiting-room-modal">
+      <h1>Waiting for Other Players to Play</h1>
+    </aside>
+    <!-- The Game -->
+    <main>
+      <header>
+        <h1>Unscramble it!</h1>
+      </header>
+      <form id="unscramble-form">
+        <input class='textfield' id="unscramble-field" type="text" placeholder="Your Answer" />
+        <button class="submit-btn" type="submit" style = "background-color:Aqua">
+            <i class="material-icons">
+              arrow_forward
+            </i></center>
+          </button>
+      </form>
     </main>
+    <!-- Score Modal -->
+    <aside class="modal" id="score-modal">
+      <h1>Scoreboard</h1>
+    </aside>
   </body>
 </html>

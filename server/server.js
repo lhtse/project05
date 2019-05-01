@@ -29,12 +29,8 @@ app.get("/", function(req, res) {
   res.sendFile(__dirname + "/index.html");
 });
 
-app.get("/waitingRoom.html", (req, res) => {
-  res.sendFile(__dirname + "/waitingRoom.html");
-});
-
-app.get("/waitingRoom.js", (req, res) => {
-  res.sendFile(__dirname + "/waitingRoom.js");
+app.get("/styles.css", function(req, res) {
+  res.sendFile(__dirname + "/styles.css");
 });
 
 /************************************
@@ -53,7 +49,7 @@ io.on("connection", client => {
   client.on("player joined", playerInfo => {
     console.log("player has joined: " + playerInfo.name);
 
-    io.emit("to waiting room", "/waitingRoom.html");
+    io.emit("to waiting room");
 
     playerMap.set(playerInfo.name, playerInfo);
     io.emit("in waiting room", playerMap.get(playerInfo.name));
