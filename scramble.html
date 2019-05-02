@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game page</title>
+</head>
+<body>
+    <h1>Unscramble the letters as fast as you can!</h1>
+
+    <script>
+        var words     = ["hello", "little", "summer", "session", "reload", "learn", "tiger", "lizard", "phone",
+                         "burger", "science", "light", "weight", "label", "sticky", "banana", "socket", "extends",
+                         "winter", "spring", "rhino"];
+
+        var scrambledWords = ["lohel", "tleitl", "emsrum", "sonesis", "dloare", "aenrl", "gtrei", "zidral", "nhepo",
+                              "errubg", "seeincc", "hilgt", "gteiwh", "llbae", "kitycs", "nnbaa", "toksec", "xndeest",
+                              "tnrwei", "grinps", "ohirn"];
+
+        //this function randomly scrambles the 'originalWord' that is given as a parameter and returns it
+        function scramble_the_word(originalWord) {
+            var scrambledWord = "";
+            var randomIndex;
+            // split the word into an array of sub-strings
+            var word = originalWord.split("")
+            while (word.length > 0) {//make sure you use all the letters
+
+                //sets our randomIndex
+                randomIndex = Math.floor(Math.random() * word.length);
+
+                //character from the random index is removed one time and added to the scrambled word
+                scrambledWord = scrambledWord + word.splice(randomIndex, 1);
+            }//continue until all the letters are used up
+            return scrambledWord;
+        }
+
+        var is_playing = true;
+        //loop to play continuously
+        while (is_playing) {
+            // Gets a random index
+            var index_of_word = Math.floor(Math.random() * words.length);
+
+            // scramble function returns a randomly scrambled random word
+            var word = scramble_the_word(words[index_of_word]);
+
+            // prompt the user to guess the original word when given the scrambled word
+            var guess = prompt("Unscramble the word \"" + word +"\" within 60 seconds!!");
+
+            guess = guess.trim().toLowerCase();//converts the entered characters to lower case
+
+            // the user guessed a wrong word
+            if (guess !== words[index_of_word]) {
+                alert("I'm sorry but the word is " + words[index_of_word] + ".");
+            }
+            
+            // else the user enters the right word
+            else {
+                alert("You guessed " + words[index_of_word] + " correctly!");
+            }
+            //checks to see if the player wants to play again or not.
+            is_playing = confirm("Click OK To keep playing or Cancel to quit.");
+        }
+    </script>
+    
+</body>
+</html>
