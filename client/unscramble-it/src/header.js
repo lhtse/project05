@@ -18,7 +18,7 @@ class Header extends Component {
     socket = io(this.state.endpoint);
   }
 
-  // Renders the component
+  // Renders the component 
   render() {
     return (
       <header>
