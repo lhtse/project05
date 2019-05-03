@@ -1,0 +1,55 @@
+body {
+  font-family: "Raleway", sans-serif;
+}
+
+/* **************************
+* Modal Styles
+*****************************/
+.modal {
+  background-color: rgba(0, 0, 0, 0.4);
+  display: none;
+  height: 100%;
+  left: 0;
+  overflow: auto;
+  padding-top: 60px;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 2;
+}
+
+.shake {
+  animation-name: shake;
+  animation-duration: 1s;
+}
+
+@keyframes shake {
+  10%,
+  90% {
+    transform: translateX(-2px);
+  }
+  20%,
+  80% {
+    transform: translateX(3px);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translateX(-5px);
+  }
+  40%,
+  60% {
+    transform: translateX(6px);
+  }
+}
+
+/* 
+* Display Name Modal Styles
+*/
+#name-form {
+  background-color: white;
+  height: 30%;
+  margin: 5% auto 15% auto;
+  overflow: hidden;
+  width: 50%;
+}
