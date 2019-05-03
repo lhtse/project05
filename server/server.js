@@ -9,6 +9,11 @@
  * 1. Build a Timer object using the existing Timers module for node.js
  * 2. Handle the case where the timer runs out before any client sends
  *    the correct answer to the server
+ * 
+ * var myInt = setInterval(function () {
+ *   clientUpdate();
+ * }, 60000);
+ * 
  */
 const express = require("express");
 const app = express();
