@@ -1,5 +1,7 @@
 var socket = io(); // Holds the client socket
-var displayName = "";
+var playerInfo = {
+  name: ""
+};
 
 //Running init() function after page loads
 addEvent(window, "load", init, false);
@@ -21,27 +23,65 @@ function addEvent(object, eventName, functName, cap) {
   }
 }
 
-/**
+/******************************************
  * Defintion of init:
- */
+ *****************************************/
 function init() {
   // Setting up action handler for the display name form
   var nameForm = document.getElementById("name-form");
   var nameField = document.getElementById("name-field");
+  var nameModal = document.getElementById("name-modal");
 
+  showModal(nameModal); // Display the display name modal
+
+  // Add even handler for display name submission
   addEvent(
     nameForm,
     "submit",
     event => {
-      displayName = nameField.value;
-      alert("display name: " + displayName);
-      socket.emit("player joined", displayName);
-      event.preventDefault(); // preventing from reloading the page fixme: might need to remove
+      playerInfo.name = nameField.value; // Update the info object with display name
+      socket.emit("player joined", playerInfo); // Send info to the server
+
+      // Unblock the modal
+      nameModal.style.display = "none";
+
+      // Display waiting room by default
+      showModal(document.getElementById("waiting-room"));
+
+      event.preventDefault(); // preventing from reloading the page
     },
     false
   );
 }
 
-socket.on("say hello", message => {
-  console.log(message);
+/*******************************
+ * Display Modals
+ *******************************/
+function showModal(modal) {
+  // Getting the modal
+  modal.style.display = "block";
+
+  // Shake modal when user clicks outside
+  addEvent(
+    window,
+    "click",
+    event => {
+      // Setting up the modal to update based on window size
+      modal.classList.remove("shake");
+      modal.offsetHeight;
+
+      // Implementing shaking effect
+      if (event.target == modal) {
+        modal.classList.add("shake");
+      }
+    },
+    false
+  );
+}
+
+/*****************************
+ * Handling server messages
+ *****************************/
+socket.on("starting game", () => {
+  document.getElementById("waiting-room").style.display = "none";
 });
