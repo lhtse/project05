@@ -6,6 +6,18 @@ var playerInfo = {
   score:0
 };
 
+var gameResults ={
+  playerOne: " ",
+  playerTwo: " ",
+  playerThree: " ",
+  playerFour: " "
+  var results = {
+      //TODO
+
+  };
+
+};
+
 //Running init() function after page loads
 addEvent(window, "load", init, false);
 /***************************************************************************************
