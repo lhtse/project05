@@ -1,6 +1,13 @@
+/**
+ * TODO:
+ * 1. Add event handler for game form
+ */
 var socket = io(); // Holds the client socket
 var playerInfo = {
-  name: ""
+  clientID: "",
+  name: "",
+  score: 0,
+  latestGuess: ""
 };
 
 //Running init() function after page loads
@@ -39,6 +46,7 @@ function init() {
     nameForm,
     "submit",
     event => {
+      playerInfo.clientID = socket.id;
       playerInfo.name = nameField.value; // Update the info object with display name
       socket.emit("player joined", playerInfo); // Send info to the server
 
@@ -49,6 +57,24 @@ function init() {
       showModal(document.getElementById("waiting-room"));
 
       event.preventDefault(); // preventing from reloading the page
+    },
+    false
+  );
+
+  // Add event handler for user entering word into the game form
+  var gameForm = document.getElementById("unscramble-form");
+  var gameField = document.getElementById("unscramble-field");
+  addEvent(
+    gameForm,
+    "submit",
+    event => {
+      // Update the latest guessed word
+      playerInfo.latestGuess = gameField.value;
+      alert("sending word: " + playerInfo.latestGuess);
+
+      socket.emit("make guess", playerInfo);
+
+      event.preventDefault();
     },
     false
   );
@@ -82,6 +108,18 @@ function showModal(modal) {
 /*****************************
  * Handling server messages
  *****************************/
-socket.on("starting game", () => {
+socket.on("play game", scrambledWord => {
+  // Display the scrambled word on the html page
+  document.getElementById("scrambled-word").innerHTML = scrambledWord;
+  // Remove the "waiting room" modal
   document.getElementById("waiting-room").style.display = "none";
+});
+
+socket.on("round over", correctWord => {
+  alert(correctWord);
+  document.getElementById("scrambled-word").innerHTML = "";
+});
+
+socket.on("try again", () => {
+  alert("try again!!!!!!!!!!!!!!");
 });
