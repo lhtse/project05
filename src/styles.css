@@ -46,10 +46,30 @@ body {
 /* 
 * Display Name Modal Styles
 */
-#name-form {
+#name-form,
+#waiting-room-message {
   background-color: white;
   height: 30%;
   margin: 5% auto 15% auto;
   overflow: hidden;
   width: 50%;
+}
+
+/************************
+* Score table styles
+************************/
+.scoreboard {
+  background-color: white;
+  height: 50%;
+  overflow: hidden;
+  width: 50%;
+}
+
+#score-table {
+  border-collapse: separate;
+  border-spacing: 50px 0;
+}
+
+td {
+  padding: 10px 0;
 }
