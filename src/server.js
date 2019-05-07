@@ -77,8 +77,19 @@ io.on("connection", client => {
       // Letting user know that the word is incorrect
       io.to(client.id).emit("try again");
     } else {
+      // Update the score of the player who guessed correctly
+      playerMap.get(client.id).score += 1;
+
+      // test that it updates the game results object fixme: delete
+      for (var i = 0; i < 4; ++i) {
+        console.log(eval("gameResults.player" + (i + 1) + ".name") + " has ");
+        console.log(eval("gameResults.player" + (i + 1) + ".score"));
+      }
+
+      // Check if the game is over (someone has scored 5 points)
+
       // If word is correct then send message to the player of the game
-      sendToGamePlayers(gameResults, "round over", correctWord);
+      sendToGamePlayers(gameResults, "round over", gameResults);
     }
   });
 });
@@ -144,8 +155,9 @@ function startNewGame() {
     playerMap.get(clientID).gameIndex = gamesArr.length; // Store the index of the current game
     // Store into the JSON object
     gameResults["player" + (i + 1)] = playerMap.get(clientID);
-    gamesArr.push(gameResults); // Push into the games array
   }
+
+  gamesArr.push(gameResults); // Push into the games array
 
   // Scramble the word
   var scrambledWord = scrambleTheWord(gameResults.correctWord);
@@ -196,7 +208,6 @@ function sendToGamePlayers(gameResults, message, objToSend) {
   for (var i = 0; i < 4; ++i) {
     // Retrieve client id for each player in the object
     playerID = eval("gameResults.player" + (i + 1) + ".clientID");
-    console.log("send to the player: " + playerID);
 
     // Send message to the specific players
     io.to(playerID).emit(message, objToSend);

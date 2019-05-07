@@ -104,10 +104,33 @@ socket.on("play game", scrambledWord => {
   document.getElementById("waiting-room").style.display = "none";
 });
 
-socket.on("round over", correctWord => {
-  alert("GAME OVERRRRRRRR");
+socket.on("round over", gameResults => {
   document.getElementById("scrambled-word").innerHTML = "";
   document.getElementById("unscramble-field").value = "";
+
+  // Setup the game results
+  var resultsArr = [
+    gameResults.player1,
+    gameResults.player2,
+    gameResults.player3,
+    gameResults.player4
+  ];
+
+  // Sort the results array based on the score
+  resultsArr.sort((object1, object2) => {
+    var a = object1.score;
+    var b = object2.score;
+    console.log("a is " + a + " b is " + b);
+    return a > b ? -1 : a < b ? 1 : 0;
+  });
+
+  // Populate the score table with the player names and scores
+  for (var i = 0; i < 4; ++i) {
+    document.getElementById("name" + (i + 1)).innerHTML = resultsArr[i].name;
+    document.getElementById("score" + (i + 1)).innerHTML = resultsArr[i].score;
+  }
+
+  showModal(document.getElementById("score-modal")); // Display game results
 });
 
 socket.on("try again", () => {
