@@ -54,12 +54,31 @@ io.on("connection", client => {
     // Add the new player to the queue
     queue.push(client.id);
 
-    console.log("q length: " + queue.length);
-
     // Check to see if there are 4 players in the queue
     if (queue.length == 4) {
-      // Start the game
-      playGame();
+      startNewGame(); // Start the game
+    }
+  });
+
+  // Handle when a word is played
+  client.on("make guess", guessedWord => {
+    // Converts the entered characters to lower case
+    guessedWord = guessedWord.trim().toLowerCase();
+    console.log(playerMap.get(client.id).name + " guessed " + guessedWord);
+
+    // Retrieve the correct game results object
+    var gameIndex = playerMap.get(client.id).gameIndex;
+    var gameResults = gamesArr[gameIndex];
+    var correctWord = gameResults.correctWord;
+
+    // Check if the word is correct
+    if (guessedWord !== correctWord) {
+      console.log("not correct word....");
+      // Letting user know that the word is incorrect
+      io.to(client.id).emit("try again");
+    } else {
+      // If word is correct then send message to the player of the game
+      sendToGamePlayers(gameResults, "round over", correctWord);
     }
   });
 });
@@ -68,6 +87,7 @@ io.on("connection", client => {
  * Begin game helper functions and variables
  *********************************************/
 var queue = []; // Creating queue using an array that will hold the names of the players
+var gamesArr = []; // Holds the objects of all games currently being played
 var playerMap = new Map();
 var words = [
   "hello",
@@ -105,25 +125,33 @@ function removeFromQueue(clientID) {
  * Removes first 4 players from the queue and
  * stores them into a JSON object
  ************************************************/
-function getGamePlayers() {
+function startNewGame() {
   // Creating the JSON object
   var gameResults = {
     player1: "",
     player2: "",
     player3: "",
-    player4: ""
+    player4: "",
+    correctWord: ""
   };
+
+  // Generating a word
+  gameResults.correctWord = getRandomWord();
+
   var clientID; // Holds the client ID
   for (i = 0; i < 4; i++) {
     clientID = queue.shift(); // Dequeuing the values from queue
-
+    playerMap.get(clientID).gameIndex = gamesArr.length; // Store the index of the current game
     // Store into the JSON object
     gameResults["player" + (i + 1)] = playerMap.get(clientID);
-    // console.log(eval("gameResults.player" + (i + 1) + ".name"));
-    // console.log(eval("gameResults.player" + (i + 1) + ".score"));
+    gamesArr.push(gameResults); // Push into the games array
   }
 
-  return gameResults;
+  // Scramble the word
+  var scrambledWord = scrambleTheWord(gameResults.correctWord);
+
+  // Send the scrambled word to all players in Game
+  sendToGamePlayers(gameResults, "play game", scrambledWord);
 }
 
 /********************************************************
@@ -131,7 +159,7 @@ function getGamePlayers() {
  * that is given as a parameter and returns it
  * @param {*} originalWord
  ********************************************************/
-function scramble_the_word(originalWord) {
+function scrambleTheWord(originalWord) {
   var scrambledWord = "";
   var randomIndex;
   // split the word into an array of sub-strings
@@ -147,46 +175,22 @@ function scramble_the_word(originalWord) {
 }
 
 /*********************************
- * Plays a round of the game
+ * Generates a random word
  ********************************/
-function playGame() {
-  // Retrieve the object that holds all the current players
-  var gameResults = getGamePlayers();
-
+function getRandomWord() {
   // Get the random word
   var indexOfWord = Math.floor(Math.random() * words.length);
   var correctWord = words[indexOfWord];
 
-  // Scramble the word
-  var scrambledWord = scramble_the_word(correctWord);
-
-  // Send the scrambled word to all players in Game
-  sendToGamePlayers(gameResults, "play game", scrambledWord);
-
-  // Start the timer
-
-  // Check that the time limit has not run out
-
-  // Listen for guessed word
-  io.on("make guess", playerInfo => {
-    // Converts the entered characters to lower case
-    var guessedWord = playerInfo.latestGuess;
-    guessedWord = guessedWord.trim().toLowerCase();
-
-    // Check if the word is correct
-    if (guessedWord !== correctWord) {
-      console.log("not correct word....");
-      // Letting user know that the word is incorrect
-      io.to("${playerID}").emit("try again");
-    } else {
-      // If word is correct then send message to the player of the game
-      sendToGamePlayers(gameResults, "round over", correctWord);
-    }
-  });
-
-  console.log("exiting the function::::::");
+  return correctWord;
 }
 
+/***********************************************
+ * Send a message to all of the players
+ * @param {*} gameResults
+ * @param {*} message
+ * @param {*} objToSend
+ ***********************************************/
 function sendToGamePlayers(gameResults, message, objToSend) {
   var playerID;
   for (var i = 0; i < 4; ++i) {
