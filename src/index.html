@@ -35,8 +35,9 @@
       <header>
         <h1>Unscramble it!</h1>
       </header>
-      <h2>Try to unscramble the following word as fast as you can!</h2>
-      <span id="scrambled-word"></span>
+      <h2>You have 60 seconds to unscramble the following word as fast as you can!</h2>
+      <div id="timer"></div>
+      <div id="scrambled-word"></div>
       <form id="unscramble-form">
         <input class='textfield' id="unscramble-field" type="text" placeholder="Your Answer" />
         <button class="submit-btn" type="submit" style = "background-color:Aqua">
@@ -49,7 +50,7 @@
     <!-- Score Modal -->
     <aside class="modal" id="score-modal">
       <div class="scoreboard">
-        <h1>Scoreboard</h1>
+        <h2 id="scoreboard-h2">Scoreboard</h2>
         <table id="score-table">
           <tr>
             <th>Player</th>
@@ -72,6 +73,7 @@
             <td id="score4"></td>
           </tr>
       </table>
+      <button type="button" id="play-again-btn">Play Again</button>
     </div>
     </aside>
   </body>

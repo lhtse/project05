@@ -50,8 +50,9 @@ body {
 #waiting-room-message {
   background-color: white;
   height: 30%;
-  margin: 5% auto 15% auto;
+  margin: 0 auto;
   overflow: hidden;
+  text-align: center;
   width: 50%;
 }
 
@@ -59,8 +60,10 @@ body {
 * Score table styles
 ************************/
 .scoreboard {
+  text-align: center;
   background-color: white;
   height: 50%;
+  margin: 0 auto;
   overflow: hidden;
   width: 50%;
 }
@@ -68,8 +71,14 @@ body {
 #score-table {
   border-collapse: separate;
   border-spacing: 50px 0;
+  margin: 0 auto;
+  text-align: center;
 }
 
 td {
   padding: 10px 0;
+}
+
+#play-again-btn {
+  display: none;
 }

@@ -1,3 +1,7 @@
+/**
+ * TODO:
+ * 1. Ensure that no 2 players can have the same display name
+ */
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -87,10 +91,21 @@ io.on("connection", client => {
       }
 
       // Check if the game is over (someone has scored 5 points)
-
-      // If word is correct then send message to the player of the game
-      sendToGamePlayers(gameResults, "round over", gameResults);
+      if (winnerExists(gameResults)) {
+        // Send message to all players that the game is over
+        sendToGamePlayers(gameResults, "gameover", gameResults);
+      } else {
+        // If word is correct then send message to the player of the game
+        sendToGamePlayers(gameResults, "round over", gameResults);
+      }
     }
+  });
+
+  client.on("times up", () => {
+    var gameIndex = playerMap.get(client.id).gameIndex;
+    var gameResults = gamesArr[gameIndex];
+
+    sendToGamePlayers(gameResults, "round over", gameResults);
   });
 });
 
@@ -212,4 +227,18 @@ function sendToGamePlayers(gameResults, message, objToSend) {
     // Send message to the specific players
     io.to(playerID).emit(message, objToSend);
   }
+}
+
+/**
+ * Determines if there is a winner in the game
+ * @param {*} gameResults
+ */
+function winnerExists(gameResults) {
+  for (var i = 0; i < 4; ++i) {
+    if (eval("gameResults.player" + (i + 1 + ".score")) == 5) {
+      return true;
+    }
+  }
+
+  return false;
 }

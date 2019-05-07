@@ -5,6 +5,7 @@ var playerInfo = {
   score: 0,
   gameIndex: ""
 };
+var timer;
 
 //Running init() function after page loads
 addEvent(window, "load", init, false);
@@ -94,17 +95,7 @@ function showModal(modal) {
   );
 }
 
-/*****************************
- * Handling server messages
- *****************************/
-socket.on("play game", scrambledWord => {
-  // Display the scrambled word on the html page
-  document.getElementById("scrambled-word").innerHTML = scrambledWord;
-  // Remove the "waiting room" modal
-  document.getElementById("waiting-room").style.display = "none";
-});
-
-socket.on("round over", gameResults => {
+function showScoreBoard(gameResults) {
   document.getElementById("scrambled-word").innerHTML = "";
   document.getElementById("unscramble-field").value = "";
 
@@ -131,8 +122,45 @@ socket.on("round over", gameResults => {
   }
 
   showModal(document.getElementById("score-modal")); // Display game results
+}
+
+/*****************************
+ * Handling server messages
+ *****************************/
+socket.on("play game", scrambledWord => {
+  // Display the scrambled word on the html page
+  document.getElementById("scrambled-word").innerHTML = scrambledWord;
+  // Remove the "waiting room" modal
+  document.getElementById("waiting-room").style.display = "none";
+
+  var timeLeft = 10;
+  document.getElementById("timer").innerHTML =
+    "Time Remaining: " + timeLeft + " s";
+
+  timer = setInterval(() => {
+    document.getElementById("timer").innerHTML =
+      "Time Remaining: " + --timeLeft + " s";
+
+    if (timeLeft == 0) {
+      clearInterval(timer);
+      socket.emit("times up");
+    }
+  }, 1000);
+});
+
+// Displaying score board when the round is over
+socket.on("round over", gameResults => {
+  clearInterval(timer);
+  showScoreBoard(gameResults);
+});
+
+socket.on("gameover", gameResults => {
+  document.getElementById("scoreboard-h2").innerHTML =
+    "Game Over! (Final Scoreboard)";
+  document.getElementById("play-again-btn").style.display = "block";
+  showScoreBoard(gameResults);
 });
 
 socket.on("try again", () => {
-  alert("try again!!!!!!!!!!!!!!");
+  alert("Oops that's not the correct word...try again!");
 });
