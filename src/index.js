@@ -1,9 +1,3 @@
-/**
- * Todo:
- * When player wants to play again...
- * 1. Reset their score
- * 2. Reset their game index
- */
 var socket = io(); // Holds the client socket
 var playerInfo = {
   clientID: "",
