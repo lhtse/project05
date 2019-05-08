@@ -2,6 +2,10 @@ body {
   font-family: "Raleway", sans-serif;
 }
 
+main {
+  text-align: center;
+}
+
 /* **************************
 * Modal Styles
 *****************************/
