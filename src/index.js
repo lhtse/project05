@@ -1,3 +1,9 @@
+/**
+ * Todo:
+ * When player wants to play again...
+ * 1. Reset their score
+ * 2. Reset their game index
+ */
 var socket = io(); // Holds the client socket
 var playerInfo = {
   clientID: "",
@@ -9,6 +15,8 @@ var gameTimer = null;
 var gameTimeout = null;
 var roundTimer = null;
 var roundTimeout = null;
+
+var isWinner = false;
 
 //Running init() function after page loads
 addEvent(window, "load", init, false);
@@ -67,10 +75,32 @@ function init() {
     event => {
       resetTimer(gameTimer);
       resetTimeout(gameTimeout);
+      resetTimer(roundTimer);
+      resetTimeout(roundTimeout);
 
       var guessedWord = gameField.value; // Get the guessed word
       socket.emit("make guess", guessedWord); // Send the guessed word to the server
       event.preventDefault();
+    },
+    false
+  );
+
+  // Handling play again button
+  var playAgainBtn = document.getElementById("play-again");
+  addEvent(
+    playAgainBtn,
+    "click",
+    event => {
+      playAgainBtn.score = 0;
+      playerInfo.gameIndex = "";
+      isWinner = false;
+
+      document.getElementById("score-modal").style.display = "none";
+      document.getElementById("winner-msg").innerHTML = "";
+      document.getElementById("play-again").style.display = "none;";
+
+      showModal(document.getElementById("waiting-room")); // Display waiting room by default
+      socket.emit("play again", playerInfo);
     },
     false
   );
@@ -105,24 +135,31 @@ function showScoreBoard(gameResults) {
   document.getElementById("scrambled-word").innerHTML = "";
   document.getElementById("unscramble-field").value = "";
 
-  // Setup the game results
-  var resultsArr = [
-    gameResults.player1,
-    gameResults.player2,
-    gameResults.player3,
-    gameResults.player4
-  ];
+  document.getElementById("correct-word").innerHTML =
+    "Answer: " + gameResults.correctWord;
+
+  var resultsArr = [];
+  for (var i = 0; i < 4; ++i) {
+    if (eval("gameResults.player" + (i + 1)) != "") {
+      resultsArr.push(eval(eval("gameResults.player" + (i + 1))));
+    }
+  }
 
   // Sort the results array based on the score
   resultsArr.sort((object1, object2) => {
     var a = object1.score;
     var b = object2.score;
-    console.log("a is " + a + " b is " + b);
     return a > b ? -1 : a < b ? 1 : 0;
   });
 
-  // Populate the score table with the player names and scores
+  // Reset the spans
   for (var i = 0; i < 4; ++i) {
+    document.getElementById("name" + (i + 1)).innerHTML = "";
+    document.getElementById("score" + (i + 1)).innerHTML = "";
+  }
+
+  // Populate the score table with the player names and scores
+  for (var i = 0; i < resultsArr.length; ++i) {
     document.getElementById("name" + (i + 1)).innerHTML = resultsArr[i].name;
     document.getElementById("score" + (i + 1)).innerHTML = resultsArr[i].score;
   }
@@ -148,6 +185,8 @@ function resetTimeout(timeout) {
  * Handling server messages
  *****************************/
 socket.on("play game", scrambledWord => {
+  resetTimer(gameTimer);
+  resetTimeout(gameTimeout);
   resetTimer(roundTimer);
   resetTimeout(roundTimeout);
 
@@ -179,6 +218,10 @@ socket.on("play game", scrambledWord => {
 socket.on("round over", gameResults => {
   resetTimer(gameTimer);
   resetTimeout(gameTimeout);
+  resetTimer(roundTimer);
+  resetTimeout(roundTimeout);
+
+  document.getElementById("scoreboard-h2").innerHTML = "Scoreboard";
 
   var timeLeft = 5;
 
@@ -205,12 +248,34 @@ socket.on("gameover", gameResults => {
   resetTimer(roundTimer);
   resetTimeout(roundTimeout);
 
+  // Ensure that the timer isn't displayed
+  document.getElementById("round-timer").innerHTML = "";
+
   document.getElementById("scoreboard-h2").innerHTML =
     "Game Over! (Final Scoreboard)";
-  document.getElementById("play-again-btn").style.display = "block";
+
+  if (!isWinner) {
+    document.getElementById("winner-msg").innerHTML =
+      "You lost...better luck next time...";
+  }
+
+  document.getElementById("play-again").style.display = "block";
   showScoreBoard(gameResults);
 });
 
 socket.on("try again", () => {
   alert("Oops that's not the correct word...try again!");
+  document.getElementById("unscramble-field").value = "";
+});
+
+socket.on("new name", () => {
+  alert("Oops...that name is already taken...");
+  document.getElementById("waiting-room").style.display = "none";
+  document.getElementById("name-field").value = "";
+  showModal(document.getElementById("name-modal"));
+});
+
+socket.on("winner", () => {
+  isWinner = true;
+  document.getElementById("winner-msg").innerHTML = "Congrats! You Won!!!!!";
 });
