@@ -5,7 +5,10 @@ var playerInfo = {
   score: 0,
   gameIndex: ""
 };
-var timer;
+var gameTimer = null;
+var gameTimeout = null;
+var roundTimer = null;
+var roundTimeout = null;
 
 //Running init() function after page loads
 addEvent(window, "load", init, false);
@@ -62,6 +65,9 @@ function init() {
     gameForm,
     "submit",
     event => {
+      resetTimer(gameTimer);
+      resetTimeout(gameTimeout);
+
       var guessedWord = gameField.value; // Get the guessed word
       socket.emit("make guess", guessedWord); // Send the guessed word to the server
       event.preventDefault();
@@ -124,37 +130,81 @@ function showScoreBoard(gameResults) {
   showModal(document.getElementById("score-modal")); // Display game results
 }
 
+function resetTimer(timer) {
+  if (timer !== null) {
+    clearInterval(timer);
+    timer = null;
+  }
+}
+
+function resetTimeout(timeout) {
+  if (timeout !== null) {
+    clearInterval(timeout);
+    timeout = null;
+  }
+}
+
 /*****************************
  * Handling server messages
  *****************************/
 socket.on("play game", scrambledWord => {
+  resetTimer(roundTimer);
+  resetTimeout(roundTimeout);
+
   // Display the scrambled word on the html page
   document.getElementById("scrambled-word").innerHTML = scrambledWord;
   // Remove the "waiting room" modal
   document.getElementById("waiting-room").style.display = "none";
 
-  var timeLeft = 10;
+  // Remove the scoreboard if it is visible
+  document.getElementById("score-modal").style.display = "none";
+
+  var gameTimeLeft = 20;
   document.getElementById("timer").innerHTML =
-    "Time Remaining: " + timeLeft + " s";
+    "Time Remaining: " + gameTimeLeft + " s";
 
-  timer = setInterval(() => {
+  gameTimer = setInterval(() => {
     document.getElementById("timer").innerHTML =
-      "Time Remaining: " + --timeLeft + " s";
-
-    if (timeLeft == 0) {
-      clearInterval(timer);
-      socket.emit("times up");
-    }
+      "Time Remaining: " + --gameTimeLeft + " s";
   }, 1000);
+
+  gameTimeout = setTimeout(() => {
+    clearInterval(gameTimer);
+    gameTimer = null;
+    socket.emit("times up");
+  }, 20000);
 });
 
 // Displaying score board when the round is over
 socket.on("round over", gameResults => {
-  clearInterval(timer);
+  resetTimer(gameTimer);
+  resetTimeout(gameTimeout);
+
+  var timeLeft = 5;
+
+  document.getElementById("round-timer").innerHTML =
+    "Time Remaining: " + timeLeft + " s";
+
   showScoreBoard(gameResults);
+
+  roundTimer = setInterval(() => {
+    document.getElementById("round-timer").innerHTML =
+      "Next Round In: " + --timeLeft + " s";
+  }, 1000);
+
+  roundTimeout = setTimeout(() => {
+    clearInterval(roundTimer);
+    document.getElementById("round-timer").innerHTML = "";
+    socket.emit("next round");
+  }, 5000);
 });
 
 socket.on("gameover", gameResults => {
+  resetTimer(gameTimer);
+  resetTimeout(gameTimeout);
+  resetTimer(roundTimer);
+  resetTimeout(roundTimeout);
+
   document.getElementById("scoreboard-h2").innerHTML =
     "Game Over! (Final Scoreboard)";
   document.getElementById("play-again-btn").style.display = "block";

@@ -107,6 +107,13 @@ io.on("connection", client => {
 
     sendToGamePlayers(gameResults, "round over", gameResults);
   });
+
+  client.on("next round", () => {
+    var gameIndex = playerMap.get(client.id).gameIndex;
+    var gameResults = gamesArr[gameIndex];
+
+    startNewRound(gameResults);
+  });
 });
 
 /********************************************
@@ -161,8 +168,8 @@ function startNewGame() {
     correctWord: ""
   };
 
-  // Generating a word
-  gameResults.correctWord = getRandomWord();
+  // // Generating a word
+  // gameResults.correctWord = getRandomWord();
 
   var clientID; // Holds the client ID
   for (i = 0; i < 4; i++) {
@@ -173,6 +180,17 @@ function startNewGame() {
   }
 
   gamesArr.push(gameResults); // Push into the games array
+  startNewRound(gameResults);
+
+  // // Scramble the word
+  // var scrambledWord = scrambleTheWord(gameResults.correctWord);
+
+  // // Send the scrambled word to all players in Game
+  // sendToGamePlayers(gameResults, "play game", scrambledWord);
+}
+
+function startNewRound(gameResults) {
+  gameResults.correctWord = getRandomWord();
 
   // Scramble the word
   var scrambledWord = scrambleTheWord(gameResults.correctWord);
