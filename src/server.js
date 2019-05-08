@@ -1,6 +1,7 @@
 /**
- * TODO:
- * 1. Ensure that no 2 players can have the same display name
+ * When player plays again
+ * 1. Remove the game object from the games array
+ * 2. Push the player back into the queue
  */
 const express = require("express");
 const app = express();
@@ -44,23 +45,31 @@ io.on("connection", client => {
     // Removing player from the queue
     removeFromQueue(client.id);
 
+    // Remove the player from the game
+    removeFromGame(client.id);
+
     // Removing the player from the player map
     playerMap.delete(client.id);
   });
 
   // Handling when player joins
   client.on("player joined", playerInfo => {
-    console.log("player has joined: " + playerInfo.name);
+    // Ensure that the name does not exist yet
+    if (playerNameExists(playerInfo.name)) {
+      io.to(client.id).emit("new name");
+    } else {
+      console.log("player has joined: " + playerInfo.name);
 
-    // Add the new player object to the player map
-    playerMap.set(client.id, playerInfo);
+      // Add the new player object to the player map
+      playerMap.set(client.id, playerInfo);
 
-    // Add the new player to the queue
-    queue.push(client.id);
+      // Add the new player to the queue
+      queue.push(client.id);
 
-    // Check to see if there are 4 players in the queue
-    if (queue.length == 4) {
-      startNewGame(); // Start the game
+      // Check to see if there are 4 players in the queue
+      if (queue.length == 4) {
+        startNewGame(); // Start the game
+      }
     }
   });
 
@@ -77,7 +86,9 @@ io.on("connection", client => {
 
     // Check if the word is correct
     if (guessedWord !== correctWord) {
-      console.log("not correct word....");
+      console.log(
+        playerMap.get(client.id).name + " was not the correct word...."
+      );
       // Letting user know that the word is incorrect
       io.to(client.id).emit("try again");
     } else {
@@ -85,15 +96,28 @@ io.on("connection", client => {
       playerMap.get(client.id).score += 1;
 
       // test that it updates the game results object fixme: delete
-      for (var i = 0; i < 4; ++i) {
-        console.log(eval("gameResults.player" + (i + 1) + ".name") + " has ");
-        console.log(eval("gameResults.player" + (i + 1) + ".score"));
+      for (var i = 1; i <= 4; ++i) {
+        if (gameResults["player" + i] != "") {
+          console.log(
+            gameResults["player" + i].name +
+              " has " +
+              gameResults["player" + i].score +
+              " points"
+          );
+        }
       }
 
       // Check if the game is over (someone has scored 5 points)
       if (winnerExists(gameResults)) {
         // Send message to all players that the game is over
         sendToGamePlayers(gameResults, "gameover", gameResults);
+
+        // Remove the game from the games array
+        var index = gamesArr.indexOf(gameResults);
+        // check if the player was in the queue
+        if (index > -1) {
+          gamesArr.splice(index, 1);
+        }
       } else {
         // If word is correct then send message to the player of the game
         sendToGamePlayers(gameResults, "round over", gameResults);
@@ -101,6 +125,7 @@ io.on("connection", client => {
     }
   });
 
+  // Handle when the time is up and end the round
   client.on("times up", () => {
     var gameIndex = playerMap.get(client.id).gameIndex;
     var gameResults = gamesArr[gameIndex];
@@ -108,11 +133,22 @@ io.on("connection", client => {
     sendToGamePlayers(gameResults, "round over", gameResults);
   });
 
+  // Move on to the next round with a new word
   client.on("next round", () => {
     var gameIndex = playerMap.get(client.id).gameIndex;
     var gameResults = gamesArr[gameIndex];
 
     startNewRound(gameResults);
+  });
+
+  // Allow the player to play again
+  client.on("play again", playerInfo => {
+    playerMap.set(client.id, playerInfo);
+    queue.push(client.id);
+
+    if (queue.length == 4) {
+      startNewGame();
+    }
   });
 });
 
@@ -146,12 +182,50 @@ var words = [
   "rhino"
 ];
 
+/********************************************
+ * Check if name exists already in the map
+ * @param {*} clientID
+ ********************************************/
+function playerNameExists(theName) {
+  var nameExists = false;
+  playerMap.forEach(value => {
+    if (value.name == theName) {
+      nameExists = true;
+    }
+  });
+
+  return nameExists;
+}
+
 /*********************************
  * Removes player from the queue
  ********************************/
 function removeFromQueue(clientID) {
   var index = queue.indexOf(clientID);
-  queue.splice(index, 1);
+  // check if the player was in the queue
+  if (index > -1) {
+    queue.splice(index, 1);
+  }
+}
+
+/***********************************
+ * Removes a player from the game
+ **********************************/
+function removeFromGame(clientID) {
+  if (playerMap.has(clientID)) {
+    var gameIndex = playerMap.get(clientID).gameIndex;
+
+    if (gamesArr.length > 0) {
+      var gameResults = gamesArr[gameIndex];
+
+      // Search for the player and update the field
+      for (var i = 1; i <= 4; ++i) {
+        if (gameResults["player" + i].clientID == clientID) {
+          gameResults["player" + i] = "";
+        }
+      }
+    }
+  }
 }
 
 /*************************************************
@@ -168,9 +242,6 @@ function startNewGame() {
     correctWord: ""
   };
 
-  // // Generating a word
-  // gameResults.correctWord = getRandomWord();
-
   var clientID; // Holds the client ID
   for (i = 0; i < 4; i++) {
     clientID = queue.shift(); // Dequeuing the values from queue
@@ -180,15 +251,13 @@ function startNewGame() {
   }
 
   gamesArr.push(gameResults); // Push into the games array
-  startNewRound(gameResults);
-
-  // // Scramble the word
-  // var scrambledWord = scrambleTheWord(gameResults.correctWord);
-
-  // // Send the scrambled word to all players in Game
-  // sendToGamePlayers(gameResults, "play game", scrambledWord);
+  startNewRound(gameResults); // Start a new game round
 }
 
+/**************************************
+ * Starts a new round of the game
+ * @param {*} gameResults
+ **************************************/
 function startNewRound(gameResults) {
   gameResults.correctWord = getRandomWord();
 
@@ -247,13 +316,15 @@ function sendToGamePlayers(gameResults, message, objToSend) {
   }
 }
 
-/**
+/***********************************************
  * Determines if there is a winner in the game
  * @param {*} gameResults
- */
+ ***********************************************/
 function winnerExists(gameResults) {
-  for (var i = 0; i < 4; ++i) {
-    if (eval("gameResults.player" + (i + 1 + ".score")) == 5) {
+  for (var i = 1; i <= 4; ++i) {
+    if (gameResults["player" + i].score == 5) {
+      console.log(gameResults["player" + i].name + " is the WINNER!");
+      io.to(gameResults["player" + i].clientID).emit("winner");
       return true;
     }
   }
