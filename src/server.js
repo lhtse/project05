@@ -1,8 +1,3 @@
-/**
- * When player plays again
- * 1. Remove the game object from the games array
- * 2. Push the player back into the queue
- */
 const express = require("express");
 const app = express();
 const path = require("path");

@@ -91,7 +91,7 @@ function init() {
 
       document.getElementById("score-modal").style.display = "none";
       document.getElementById("winner-msg").innerHTML = "";
-      document.getElementById("play-again").style.display = "none;";
+      document.getElementById("play-again").style.display = "none";
 
       showModal(document.getElementById("waiting-room")); // Display waiting room by default
       socket.emit("play again", playerInfo);
@@ -192,7 +192,7 @@ socket.on("play game", scrambledWord => {
   // Remove the scoreboard if it is visible
   document.getElementById("score-modal").style.display = "none";
 
-  var gameTimeLeft = 20;
+  var gameTimeLeft = 60;
   document.getElementById("timer").innerHTML =
     "Time Remaining: " + gameTimeLeft + " s";
 
@@ -215,6 +215,7 @@ socket.on("round over", gameResults => {
   resetTimer(roundTimer);
   resetTimeout(roundTimeout);
 
+  document.getElementById("play-again").style.display = "none";
   document.getElementById("scoreboard-h2").innerHTML = "Scoreboard";
 
   var timeLeft = 5;
